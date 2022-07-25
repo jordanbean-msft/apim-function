@@ -30,10 +30,10 @@ namespace api
         TokenSecret = TokenSecret.Secret
       };
 
-      response.WriteAsJsonAsync<ReturnData>(new ReturnData
+      response.WriteAsJsonAsync<AccessTokenReturnData>(new AccessTokenReturnData
       {
         Success = true,
-        Data = new ReturnToken
+        Data = new AccessTokenReturnToken
         {
           Token = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(accessToken)))
         },
@@ -42,28 +42,5 @@ namespace api
 
       return response;
     }
-  }
-
-  public class AccessToken
-  {
-    public AccessToken() { }
-
-    public string Key { get; set; }
-    public string Secret { get; set; }
-    public string TokenSecret { get; set; }
-  }
-
-  public class ReturnToken
-  {
-    public ReturnToken() { }
-    public string Token { get; set; }
-  }
-
-  public class ReturnData
-  {
-    public ReturnData() { }
-    public bool Success { get; set; }
-    public ReturnToken Data { get; set; }
-    public List<string> Errors { get; set; }
   }
 }
