@@ -1,18 +1,18 @@
 # apim-function
 
-This repo shows you how to call a custom "token" API endpoint programatically as part of an [Azure API Management]() policy for a different operation.
+This repo shows you how to call a custom "token" API endpoint programatically as part of an [Azure API Management](https://docs.microsoft.com/en-us/azure/api-management/api-management-key-concepts) policy for a different operation.
 
 In this example, the custom API has a "token" endpoint that is required to call the actual API endpoint. This token endpoint requires some query parameters and returns a custom "token" in the body of the call. This custom token is then passed as the bearer token to the actual API endpoint.
 
-We can use [Azure API Management policies]() to call the custom "token" endpoint before allowing the call to reach the actual API endpoint. We will also force Azure AD authentication to the API call by validating the JWT token before allowing the call to continue.
+We can use [Azure API Management policies](https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-policies) to call the custom "token" endpoint before allowing the call to reach the actual API endpoint. We will also force Azure AD authentication to the API call by validating the JWT token before allowing the call to continue.
 
 ## Azure API Management policies
 
-We need a few API Management policies to do all of the operations we need before the request reaches the actual API endpoint.
+We need a few API Management policies to do all of the operations we need before the request reaches the actual API endpoint. These can be found in the `/infra/api-management.bicep` file.
 
 ### validate-jwt
 
-First, we want to ensure all requests have a valid AAD JWT token before they can then call the API endpoint. We need to validate that they token came from my AAD tenant & that the audience is for the correct backend AAD service principal.
+First, we want to ensure all requests have a valid AAD JWT token before they can then call the API endpoint. We need to validate that they token came from my **AAD tenant** & that the **audience** is for the correct backend AAD service principal.
 
 ```xml
 <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized. Access token is missing or invalid.">
@@ -99,11 +99,41 @@ Finally, we can clear the `key` & `secret` query parameters & use the `client` &
 
 1.  Create the AAD service principal to be the identity of the backing API.
 
-1.  Grant the AAD service principal access to call the backing API.
+    1.  Navigate to the [Azure portal](https://portal.azure.com)
+
+    1.  Search for the **Azure Active Directory** service.
+
+    1.  Click on **App Registrations** and click on **New registration**.
+
+    1.  Give it a name & a redirect URI (the redirect URI doesn't really matter since the API won't be authenticating itself in this example).
+
+    1.  On the **Overview** blade, note the **Application (client) ID** and **Directory (tenant) ID**.
+
+    1.  Click on the **Expose an API**
+
+    1.  Set the **Application ID URI** (you can keep the default, which is the application ID of the app registration)
+
+    1.  Click on **Add a scope** and give it a name (example: **API.AccessAsUser**). Set the other fields as appropriate and click **Save**.
+
+1.  Create the AAD service principal to be the identity of calling service (in this example, Postman).
+
+    1.  Click on **App Registrations** and click on **New registration**.
+
+    1.  Give it a name & a redirect URI (you can select **Web** and **https://oauth.pstmn.io/v1/callback** as the redirect URI for Postman).
+
+    1.  Note the On the **Overview** blade, note the **Application (client) ID** and **Directory (tenant) ID**.
+
+    1.  Click on the **API permissions** blade and click on **Add a permission**.
+
+    1.  Select the **My APIs** tab and find the other app registration you created earlier. Select the **scope** you created earlier. Click **Add permissions**.
+
+1.  Grant the calling service access to the API.
+
+    1.  On the original app registration (the one for the API), click on the **Expose an API** blade and then click on **Add a client application**. Add the **application (client) ID** of the **calling** application, select the **Authorized scopes** and click on **Add application**.
 
 1.  Update the `/infra/env/dev.parameters.json` file as needed.
 
-1.  Execute the following Azure CLI command to deploy the infrastructure (change the email addresses & secret as needed).
+1.  Execute the following Azure CLI command to deploy the infrastructure (change the **email addresses**, **resource group** & **functionAppAADAudience** as needed).
 
     ```shell
     az deployment group create --resource-group rg-apimFunction-ussc-dev --template-file ./main.bicep --parameters ./env/dev.parameters.json --parameters apiManagementServicePublisherName=apimFunction apiManagementServicePublisherEmail=dwight.k.schrute@dunder-mifflin.com functionAppAADAudience=api://92e79087-fe31-4926-adb4-e5eef1114483
@@ -137,3 +167,10 @@ Finally, we can clear the `key` & `secret` query parameters & use the `client` &
 1.  Finally, call the API endpoint and verify that the data is returned.
 
 ![authenticatedApiRequest](./.img/authenticatedApiRequest.png)
+
+## Links
+
+- [Azure API Management](https://docs.microsoft.com/en-us/azure/api-management/overview)
+- [Azure API Management policies](https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-policies)
+- [Azure API Management policy expressions](https://docs.microsoft.com/en-us/azure/api-management/api-management-policy-expressions)
+- [Azure API Management policy reference index](https://docs.microsoft.com/en-us/azure/api-management/api-management-policies)
