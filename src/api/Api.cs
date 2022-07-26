@@ -17,9 +17,9 @@ namespace api
     }
 
     [Function("api")]
-    public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequestData req)
+    public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestData req)
     {
-      IEnumerable<string> bearerToken = null;
+      IEnumerable<string>? bearerToken = null;
       bool status = req.Headers.TryGetValues("Authorization", out bearerToken);
 
       if (status == false || bearerToken == null || bearerToken.Count() == 0)
@@ -29,20 +29,21 @@ namespace api
       }
       else
       {
-        _logger.LogInformation("Bearer token: " + bearerToken.First());
-        AccessToken accessToken = JsonSerializer.Deserialize<AccessToken>(System.Convert.FromBase64String(bearerToken.First().Replace("Bearer ", "")));
+        AccessToken? accessToken = JsonSerializer.Deserialize<AccessToken>(System.Convert.FromBase64String(bearerToken.First().Replace("Bearer ", "")));
 
-        _logger.LogInformation("Access token: " + accessToken.TokenSecret);
-        if (accessToken.TokenSecret != TokenSecret.Secret)
+        if (accessToken == null || accessToken.TokenSecret != TokenSecret.Secret)
         {
           return req.CreateResponse(HttpStatusCode.Unauthorized);
         }
       }
 
       var response = req.CreateResponse(HttpStatusCode.OK);
-      response.Headers.Add("Content-Type", "text/plain; charset=utf-8");
 
-      response.WriteString("Welcome to Azure Functions!");
+      response.WriteAsJsonAsync(new
+      {
+        question = "What kind of bear is best?",
+        answer = "False, black bear!"
+      });
 
       return response;
     }

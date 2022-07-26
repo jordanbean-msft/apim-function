@@ -4,8 +4,8 @@ namespace api
   {
     public AccessToken() { }
 
-    public string Key { get; set; }
-    public string Secret { get; set; }
-    public string TokenSecret { get; set; }
+    public string? Key { get; set; }
+    public string? Secret { get; set; }
+    public string? TokenSecret { get; set; }
   }
 }

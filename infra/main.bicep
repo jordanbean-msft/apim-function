@@ -4,6 +4,8 @@ param region string
 param location string = resourceGroup().location
 param apiManagementServicePublisherEmail string
 param apiManagementServicePublisherName string
+param tenantId string = subscription().tenantId
+param functionAppAADAudience string
 
 module names 'resource-names.bicep' = {
   name: 'resource-names'
@@ -44,11 +46,12 @@ module storageDeployment 'storage.bicep' = {
 module virtualNetworkDeployment 'virtual-network.bicep' = {
   name: 'virtual-network-deployment'
   params: {
-    apimSubnetName: names.outputs.apimSubnetName
+    apiManagementServiceSubnetName: names.outputs.apiManagementServiceSubnetName
     applicationSubnetName: names.outputs.applicationSubnetName
     location: location
     privateEndpointSubnetName: names.outputs.privateEndpointSubnetName
     vNetName: names.outputs.vNetName
+    apiManagementServiceNetworkSecurityGroupName: names.outputs.apiManagementServiceNetworkSecurityGroupName
   }
 }
 
@@ -90,6 +93,12 @@ module apiManagementDeployment 'api-management.bicep' = {
     apiManagementServiceApiEndpoint: names.outputs.apiManagementServiceApiEndpoint
     apiManagementServiceApiApplicationEndpoint: names.outputs.apiManagementServiceApiApplicationEndpoint
     appInsightsName: loggingDeployment.outputs.appInsightsName
+    apiManagementServicePublicIpAddressName: names.outputs.apiManagementServicePublicIpAddressName
+    apiManagementServiceSubnetName: virtualNetworkDeployment.outputs.apiManagementServiceSubnetName
+    vNetName: virtualNetworkDeployment.outputs.vNetName
+    functionAppName: functionDeployment.outputs.functionAppName
+    tenantId: tenantId
+    functionAppAADAudience: functionAppAADAudience
   }
 }
 

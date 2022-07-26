@@ -6,7 +6,7 @@ resource privateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
   location: 'global'
 }
 
-resource vNetRegion1 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
+resource vNetRegion 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
   name: vNetName
 }
 
@@ -16,7 +16,7 @@ resource privateDnsZoneLinkRegion1 'Microsoft.Network/privateDnsZones/virtualNet
   properties: {
     registrationEnabled: false
     virtualNetwork: {
-      id: vNetRegion1.id
+      id: vNetRegion.id
     }
   }
 }

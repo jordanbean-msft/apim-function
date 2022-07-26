@@ -17,7 +17,7 @@ namespace api
     }
 
     [Function("token")]
-    public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequestData req)
+    public HttpResponseData Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequestData req)
     {
       var query = System.Web.HttpUtility.ParseQueryString(req.Url.Query);
 
