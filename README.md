@@ -6,6 +6,8 @@ In this example, the custom API has a "token" endpoint that is required to call 
 
 We can use [Azure API Management policies](https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-policies) to call the custom "token" endpoint before allowing the call to reach the actual API endpoint. We will also force Azure AD authentication to the API call by validating the JWT token before allowing the call to continue.
 
+![architecture](./.img/architecture.png)
+
 ## Azure API Management policies
 
 We need a few API Management policies to do all of the operations we need before the request reaches the actual API endpoint. These can be found in the `/infra/api-management.bicep` file.
@@ -20,6 +22,9 @@ First, we want to ensure all requests have a valid AAD JWT token before they can
     <audiences>
         <audience>api://92e79087-fe31-4926-adb4-e5eef1114483</audience>
     </audiences>
+    <issuers>
+        <issuer>https://sts.windows.net/5bd0289f-3c17-4315-96eb-0e2116fa49fc/</issuer>
+    </issuers>
 </validate-jwt>
 ```
 
